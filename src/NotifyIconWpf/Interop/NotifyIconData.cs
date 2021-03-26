@@ -131,7 +131,20 @@ namespace Hardcodet.Wpf.TaskbarNotification.Interop
             if (Environment.OSVersion.Version.Major >= 6)
             {
                 //use the current size
-                data.cbSize = (uint) Marshal.SizeOf(data);
+                try
+                {
+                    data.cbSize = (uint) Marshal.SizeOf(data);
+                }
+                catch (MissingMethodException) // this exception may occur on Windows 7 and 8 even tho the framework installed
+                {
+                    // just use the same solution as for Windows XP
+                    //we need to set another size on xp/2003- otherwise certain
+                    //features (e.g. balloon tooltips) don't work.
+                    data.cbSize = 952; // NOTIFYICONDATAW_V3_SIZE
+
+                    //set to fixed timeout
+                    data.VersionOrTimeout = 10;
+                }
             }
             else
             {
